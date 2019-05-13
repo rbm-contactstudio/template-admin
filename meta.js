@@ -15,5 +15,5 @@ module.exports = {
       message: 'Autor'
     }
   },
-  completeMessage: 'Completo!'
+  completeMessage: 'Projeto criado!'
 };
