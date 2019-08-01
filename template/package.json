@@ -11,7 +11,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "@contactstudio/admin-tools": "^0.3.5",
+    "@contactstudio/admin-tools": "^0.3.8",
     "bootstrap": "^3.3.7",
     "core-js": "^2.6.5",
     "jquery": "^3.4.0",
