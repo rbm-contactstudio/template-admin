@@ -28,13 +28,14 @@
     data(){
       return {
         windowWidth: null,
-        menulist: [
-          {text: 'Menu', route: '/menu', perm: '', state: this.getCsState}
-        ]
+        showMenu: false
       }
     },
     created(){
       this['set-session'](this.getSession());
+      setTimeout(() => {
+        this.showMenu = true
+      }, 1000)
     },
     mounted(){
       let me = this;
@@ -49,6 +50,11 @@
     computed: Object.assign({},
       mapGetters('lib', ['getCsState', 'getShowMenuFloat']),
       {
+        menulist(){
+          return [
+            {text: 'Menu', route: '/menu', perm: '', state: this.getCsState}
+          ]
+        },
         styleMenuShow(){
           return this.getShowMenuFloat || this.windowWidth > 1200 ? {left: '0px'} : {left: '-230px'};
         },
