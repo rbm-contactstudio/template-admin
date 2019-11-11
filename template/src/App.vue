@@ -3,7 +3,7 @@
     <div class="cs-app">
       <cs-header></cs-header>
       <cs-alert></cs-alert>
-      <section>
+      <section v-if="getCsState && (getCsState.permissions || getCsState.typeUser === 'DONO')">
         <div :class="{'cs-menu-list': windowWidth > 1200, 'cs-menu-list-float': windowWidth <= 1200}" :style="styleMenuShow">
           <cs-menu :items="menulist"></cs-menu>
         </div>
@@ -14,6 +14,88 @@
     </div>
   </div>
 </template>
+
+<script>
+  import { mapActions, mapGetters } from 'vuex';
+  import { CsMenu, CsHeader, CsAlert } from '@contactstudio/admin-tools';
+
+  export default {
+    components: {
+      CsMenu,
+      CsHeader,
+      CsAlert
+    },
+    data(){
+      return {
+        windowWidth: null,
+        menulist: [
+          {text: 'Menu', route: '/menu', perm: '', state: this.getCsState}
+        ]
+      }
+    },
+    created(){
+      this['set-session'](this.getSession());
+    },
+    mounted(){
+      let me = this;
+      this['get-user']().then(ret => {
+        me['set-theme'](ret.theme);
+      });
+      this.$nextTick(function() {
+        window.addEventListener('resize', this.getWindowWidth);
+        this.getWindowWidth();
+      })
+    },
+    computed: Object.assign({},
+      mapGetters('lib', ['getCsState', 'getShowMenuFloat']),
+      {
+        styleMenuShow(){
+          return this.getShowMenuFloat || this.windowWidth > 1200 ? {left: '0px'} : {left: '-230px'};
+        },
+        classContent(){
+          return !this.getShowMenuFloat || this.windowWidth < 1200 ? 'cs-content-full' : 'cs-content';
+        }
+      }
+    ),
+    methods: Object.assign({},
+      mapActions('lib/', [
+        'set-session', 'get-user', 'set-theme', 'change-alert'
+      ]),
+      {
+        getWindowWidth(){
+          this.windowWidth = document.documentElement.clientWidth;
+        },
+        getQueryString(){
+          let result = {};
+          if(location.search.length > 0){
+            let pairs = (location.search).slice(1).split('&');
+            for(let idx in pairs){
+              let pair = pairs[idx].split('=');
+              if(pair[0]){
+                result[pair[0].toLowerCase()] = decodeURIComponent(pair[1] || '');
+              }
+            }
+          }
+          return result;
+        },
+        getCookies(){
+          let cookies = document.cookie;
+          if (cookies) {
+            cookies = cookies.replace(/;[ ]/gi, '","');
+            cookies = '{"' + cookies.replace(/=/gi, '":"') + '"}';
+            return JSON.parse(cookies);
+          }
+          return {};
+        },
+        getSession(){
+          let allQueryString = this.getQueryString();
+          let allCookies = this.getCookies();
+          return allQueryString['cssession'] ? allQueryString['cssession'] : allCookies['cssession'];
+        }
+      }
+    )
+  }
+</script>
 
 <style lang="scss">
   $colorBase: #4b4b4b;
@@ -272,85 +354,3 @@
     margin-top: 15px;
   }
 </style>
-
-<script>
-  import { mapActions, mapGetters } from 'vuex';
-  import { CsMenu, CsHeader, CsAlert } from '@contactstudio/admin-tools';
-
-  export default {
-    components: {
-      CsMenu,
-      CsHeader,
-      CsAlert
-    },
-    data(){
-      return {
-        windowWidth: null,
-        menulist: [
-          {text: 'Menu', route: '/menu'}
-        ]
-      }
-    },
-    created(){
-      this['set-session'](this.getSession());
-    },
-    mounted(){
-      let me = this;
-      this['get-user']().then(ret => {
-        me['set-theme'](ret.theme);
-      });
-      this.$nextTick(function() {
-        window.addEventListener('resize', this.getWindowWidth);
-        this.getWindowWidth();
-      })
-    },
-    computed: Object.assign({},
-      mapGetters('lib', ['getShowMenuFloat']),
-      {
-        styleMenuShow(){
-          return this.getShowMenuFloat || this.windowWidth > 1200 ? {left: '0px'} : {left: '-230px'};
-        },
-        classContent(){
-          return !this.getShowMenuFloat || this.windowWidth < 1200 ? 'cs-content-full' : 'cs-content';
-        }
-      }
-    ),
-    methods: Object.assign({},
-      mapActions('lib/', [
-        'set-session', 'get-user', 'set-theme', 'change-alert'
-      ]),
-      {
-        getWindowWidth(){
-          this.windowWidth = document.documentElement.clientWidth;
-        },
-        getQueryString(){
-          let result = {};
-          if(location.search.length > 0){
-            let pairs = (location.search).slice(1).split('&');
-            for(let idx in pairs){
-              let pair = pairs[idx].split('=');
-              if(pair[0]){
-                result[pair[0].toLowerCase()] = decodeURIComponent(pair[1] || '');
-              }
-            }
-          }
-          return result;
-        },
-        getCookies(){
-          let cookies = document.cookie;
-          if (cookies) {
-            cookies = cookies.replace(/;[ ]/gi, '","');
-            cookies = '{"' + cookies.replace(/=/gi, '":"') + '"}';
-            return JSON.parse(cookies);
-          }
-          return {};
-        },
-        getSession(){
-          let allQueryString = this.getQueryString();
-          let allCookies = this.getCookies();
-          return allQueryString['cssession'] ? allQueryString['cssession'] : allCookies['cssession'];
-        }
-      }
-    )
-  }
-</script>
