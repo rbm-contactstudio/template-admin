@@ -10,6 +10,13 @@ export default new Router({
     {
       path: '/',
       name: 'home'
+    },{
+      path: '/user',
+      name: 'user',
+      component: r => require.ensure([], () => r(require('@contactstudio/admin-tools/src/components/CsUserConfigPage.vue'))),
+      meta: {
+        bcLinkText: 'Preferências'
+      }
     }
   ]
 })
